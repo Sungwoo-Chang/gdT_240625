@@ -1,6 +1,12 @@
 
 setwd("C:/")
 
+# ==============================================================================
+# //                                                                          //
+# //                           Preprocessing                                  //
+# //                                                                          //
+# ==============================================================================
+
 # Read data=====================================================================
 data1 <- Read10X("PJH")
 data1 <- CreateSeuratObject(counts = data1, project = "WT1", min.cells = 3, min.features = 200)
@@ -98,6 +104,63 @@ a.combined <- readRDS("a.combined.rds")
 
 # ==============================================================================
 # //                                                                          //
+# //                       Cell type annotation                               //
+# //                                                                          //
+# ==============================================================================
+
+DefaultAssay(a.combined) <- "RNA"
+DimPlot(a.combined, label = TRUE)
+
+# gene expression 확인 with FeaturePlot
+FeaturePlot(a.combined, "Cst3")
+
+
+FeaturePlot(a.combined, "P2ry12") # Microglia
+FeaturePlot(a.combined, c("Cd3e", "Cd4")) # CD4 T cells
+FeaturePlot(a.combined, c("Cd3e", "Cd8a"))# CD8 T cells
+FeaturePlot(a.combined, c("Ncr1"))# NK cells
+FeaturePlot(a.combined, c("Cd19"))# B cells
+FeaturePlot(a.combined, c("Apoe", "Plac8", "Ifitm3"))# Monocyte/Macrophage
+FeaturePlot(a.combined, c("Itgax"))# DC
+
+
+# gene expression 확인 with violin plot
+VlnPlot(a.combined, c("Ncr1"), pt.size = 0)
+VlnPlot(a.combined, c("Cd3e", "Cd8a"), pt.size = 0)
+
+a.combined <- a.combined %>% 
+  RenameIdents(
+    "0" = "Mo/Mp",
+    "1" = "NK",
+    "2" = "Microglia",
+    "3" = "Microglia",
+    "4" = "CD4",
+    "5" = "CD8",
+    "6" = "B",
+    "7" = "Unknown",
+    "8" = "CD4",
+    "9" = "CD8",
+    "10" = "CD4",
+    "11" = "DC",
+    "12" = "Mo/Mp",
+    "13" = "CD4",
+    "14" = "DC",
+    "15" = "Unknown",
+    "16" = "Microglia",
+    "17" = "Microglia",
+    "18" = "Unknown",
+    "19" = "Unknown",
+    "20" = "Neutrophil"
+  )
+a.combined$celltype <- Idents(a.combined)
+
+DimPlot(a.combined, label = TRUE)
+DimPlot(a.combined, label = TRUE, split.by = "orig.ident")
+
+
+
+# ==============================================================================
+# //                                                                          //
 # //                       extract gd T cells                                 //
 # //                                                                          //
 # ==============================================================================
@@ -152,7 +215,7 @@ a.combined@meta.data
 gdT <- a.combined[, (a.combined$gdT %in% "True")]
 
 Idents(gdT) <- "gdT"
-VlnPlot(gdT, c("Ptprc", "Trac", "Cd3e", "Trdc"))
+VlnPlot(gdT, c("Ptprc", "Trac", "Cd3e", "Trdc"), ncol = 4)
 
 '''
 cytokine_receptors <- list(
@@ -201,11 +264,8 @@ cytokine_receptors <- list(
 )
 '''
 
+sparse_matrix <- data1[["RNA"]]$counts
+count_matrix = as.data.frame(data1)
+View(count_matrix)
 
-
-
-
-
-
-
-
+View(data1)
