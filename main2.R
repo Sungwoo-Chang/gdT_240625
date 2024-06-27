@@ -111,23 +111,21 @@ a.combined <- readRDS("a.combined.rds")
 DefaultAssay(a.combined) <- "RNA"
 DimPlot(a.combined, label = TRUE)
 
-# gene expression 확인 with FeaturePlot
-FeaturePlot(a.combined, "Cst3")
+# gene expression 확인 with FeaturePlot==========================================
+FeaturePlot(a.combined, "P2ry12")                 # Microglia
+FeaturePlot(a.combined, c("Cd3e", "Cd4"))         # CD4 T cells
+FeaturePlot(a.combined, c("Cd3e", "Cd8a"))        # CD8 T cells
+FeaturePlot(a.combined, c("Ncr1"))                # NK cells
+FeaturePlot(a.combined, c("Cd19"))                # B cells
+FeaturePlot(a.combined, c("Apoe", "Plac8", "Ifitm3"))  # Monocyte/Macrophage
+FeaturePlot(a.combined, c("Itgax"))               # DC
 
 
-FeaturePlot(a.combined, "P2ry12") # Microglia
-FeaturePlot(a.combined, c("Cd3e", "Cd4")) # CD4 T cells
-FeaturePlot(a.combined, c("Cd3e", "Cd8a"))# CD8 T cells
-FeaturePlot(a.combined, c("Ncr1"))# NK cells
-FeaturePlot(a.combined, c("Cd19"))# B cells
-FeaturePlot(a.combined, c("Apoe", "Plac8", "Ifitm3"))# Monocyte/Macrophage
-FeaturePlot(a.combined, c("Itgax"))# DC
-
-
-# gene expression 확인 with violin plot
+# gene expression 확인 with violin plot===========================================
 VlnPlot(a.combined, c("Ncr1"), pt.size = 0)
 VlnPlot(a.combined, c("Cd3e", "Cd8a"), pt.size = 0)
 
+# Cluster 이름 바꾸기 =============================================================
 a.combined <- a.combined %>% 
   RenameIdents(
     "0" = "Mo/Mp",
