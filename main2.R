@@ -1,5 +1,10 @@
+library(Seurat)
+library(ggplot2)
+library(ggridges)
+library(dplyr)
 
-setwd("C:/")
+
+setwd("C:/Users/heung/OneDrive/Documents/scData/15. gdTcell_PWH/")
 
 # ==============================================================================
 # //                                                                          //
@@ -91,7 +96,7 @@ ElbowPlot(a.combined)
 a.combined <- FindNeighbors(a.combined, reduction = 'pca', dims = 1:30)
 a.combined <- FindClusters(a.combined, resolution = 0.5)
 a.combined <- RunUMAP(a.combined, reduction = "pca", dims = 1:30)
-a.combined <- RunTSNE(a.combined, dims = 1:40)
+a.combined <- RunTSNE(a.combined, dims = 1:30)
 
 DimPlot(a.combined, reduction = "umap") + NoLegend()
 DimPlot(a.combined, reduction = "tsne") + NoLegend()
@@ -111,21 +116,23 @@ a.combined <- readRDS("a.combined.rds")
 DefaultAssay(a.combined) <- "RNA"
 DimPlot(a.combined, label = TRUE)
 
-# gene expression 확인 with FeaturePlot==========================================
-FeaturePlot(a.combined, "P2ry12")                 # Microglia
-FeaturePlot(a.combined, c("Cd3e", "Cd4"))         # CD4 T cells
-FeaturePlot(a.combined, c("Cd3e", "Cd8a"))        # CD8 T cells
-FeaturePlot(a.combined, c("Ncr1"))                # NK cells
-FeaturePlot(a.combined, c("Cd19"))                # B cells
-FeaturePlot(a.combined, c("Apoe", "Plac8", "Ifitm3"))  # Monocyte/Macrophage
-FeaturePlot(a.combined, c("Itgax"))               # DC
+# gene expression 확인 with FeaturePlot
+FeaturePlot(a.combined, "Cst3")
 
 
-# gene expression 확인 with violin plot===========================================
+FeaturePlot(a.combined, "P2ry12") # Microglia
+FeaturePlot(a.combined, c("Cd3e", "Cd4")) # CD4 T cells
+FeaturePlot(a.combined, c("Cd3e", "Cd8a"))# CD8 T cells
+FeaturePlot(a.combined, c("Ncr1"))# NK cells
+FeaturePlot(a.combined, c("Cd19"))# B cells
+FeaturePlot(a.combined, c("Apoe", "Plac8", "Ifitm3"))# Monocyte/Macrophage
+FeaturePlot(a.combined, c("Itgax"))# DC
+
+
+# gene expression 확인 with violin plot
 VlnPlot(a.combined, c("Ncr1"), pt.size = 0)
-VlnPlot(a.combined, c("Cd3e", "Cd8a"), pt.size = 0)
+VlnPlot(a.combined, c("Cd3e", "Cd4"), pt.size = 0)
 
-# Cluster 이름 바꾸기 =============================================================
 a.combined <- a.combined %>% 
   RenameIdents(
     "0" = "Mo/Mp",
@@ -151,9 +158,11 @@ a.combined <- a.combined %>%
     "20" = "Neutrophil"
   )
 a.combined$celltype <- Idents(a.combined)
+Idents(a.combined) <- "seurat_clusters"
 
 DimPlot(a.combined, label = TRUE)
 DimPlot(a.combined, label = TRUE, split.by = "orig.ident")
+DimPlot(a.combined, label = TRUE, group.by = "orig.ident")
 
 
 
@@ -261,9 +270,3 @@ cytokine_receptors <- list(
   )
 )
 '''
-
-sparse_matrix <- data1[["RNA"]]$counts
-count_matrix = as.data.frame(data1)
-View(count_matrix)
-
-View(data1)
