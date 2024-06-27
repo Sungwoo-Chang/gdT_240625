@@ -52,7 +52,7 @@ DimHeatmap(data1, dims = 1:5, ncol = 5)
 ElbowPlot(data1, ndims = 50)
 
 data1 <- FindNeighbors(data1, reduction = "pca", dims = 30)
-data1 <- FindClusters(data1, resolution = 1)
+data1 <- FindClusters(data1, resolution = 0.5)
 data1 <- RunUMAP(data1, reduction = "pca", dims = 1:30)
 data1 <- RunTSNE(data1, dims = 1:30)
 DimPlot(data1, reduction = "umap")
@@ -87,7 +87,8 @@ a.combined <- FindClusters(a.combined, resolution = 0.5)
 a.combined <- RunUMAP(a.combined, reduction = "pca", dims = 1:30)
 a.combined <- RunTSNE(a.combined, dims = 1:40)
 
-DimPlot(a.combined)
+DimPlot(a.combined, reduction = "umap") + NoLegend()
+DimPlot(a.combined, reduction = "tsne") + NoLegend()
 
 # Save and load the integrated file ============================================
 saveRDS(a.combined, "a.combined.rds")
@@ -106,29 +107,32 @@ DefaultAssay(a.combined) <- "RNA"
 
 df <- FetchData(
   object = a.combined,
-  vars = c("Ptprc", "Trac", "Trdc")
+  vars = c("Ptprc", "Cd3e", "Trac", "Trdc")
 )
 
 # histogram
 ggplot(df, aes(x = Ptprc))+ geom_histogram() + geom_vline(xintercept = 0.3) + theme_minimal()
+ggplot(df, aes(x = Cd3e))+ geom_histogram() + geom_vline(xintercept = 0.3) + theme_minimal()
 ggplot(df, aes(x = Trac))+ geom_histogram() + geom_vline(xintercept = 0.2) + theme_minimal()
 ggplot(df, aes(x = Trdc))+ geom_histogram() + geom_vline(xintercept = 0.2) + theme_minimal()
 
 # ridge plot
 ggplot(df, aes(x = Ptprc, y = stat(density))) +
   geom_density_ridges() + theme_minimal() + geom_vline(xintercept = 0.3)
+ggplot(df, aes(x = Cd3e, y = stat(density))) +
+  geom_density_ridges() + theme_minimal() + geom_vline(xintercept = 0.3)
 ggplot(df, aes(x = Trac, y = stat(density))) +
   geom_density_ridges() + theme_minimal() + geom_vline(xintercept = 0.2)
 ggplot(df, aes(x = Trdc, y = stat(density))) +
   geom_density_ridges() + theme_minimal() + geom_vline(xintercept = 0.2)
 
-
 # gd T filtering ===============================================================
 Ptprc_high <- WhichCells(a.combined, expression = Ptprc > 0.3)
+Cd3e_high <- WhichCells(a.combined, expression = Cd3e > 0.3)
 Trac_low <- WhichCells(a.combined, expression = Trac < 0.2)
 Trdc_high <- WhichCells(a.combined, expression = Trdc > 0.2)
 
-gdT <- intersect(intersect(Ptprc_high, Trac_low), Trdc_high)
+gdT <- Ptprc_high %>% intersect(Cd3e_high) %>% intersect(Trac_low) %>% intersect(Trdc_high)
 
 # Seurat object cell metadata에 gdT column 추가 (False and True)
 a.combined <- AddMetaData(
@@ -148,8 +152,7 @@ a.combined@meta.data
 gdT <- a.combined[, (a.combined$gdT %in% "True")]
 
 Idents(gdT) <- "gdT"
-VlnPlot(gdT, c("Ptprc", "Trac", "Cd3e"))
-
+VlnPlot(gdT, c("Ptprc", "Trac", "Cd3e", "Trdc"))
 
 '''
 cytokine_receptors <- list(
