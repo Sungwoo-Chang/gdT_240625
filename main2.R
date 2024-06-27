@@ -26,8 +26,8 @@ plot3 <- FeatureScatter(data2, feature1 = "nFeature_RNA", feature2 = "pct_mt")
 plot1 + plot2 + plot3
 
 # Quality Control===============================================================
-data1 <- subset(data1, subset = pct_mt < 12 & nCount_RNA < 40000 & nFeature_RNA < 5000)
-data2 <- subset(data2, subset = pct_mt < 12 & nCount_RNA < 40000 & nFeature_RNA < 5000)
+data1 <- subset(data1, subset = pct_mt < 10 & nCount_RNA < 40000 & nFeature_RNA > 400)
+data2 <- subset(data2, subset = pct_mt < 10 & nCount_RNA < 40000 & nFeature_RNA > 400)
 
 # Quality Control 됐는지 확인 ==================================================
 plot1 <- FeatureScatter(data1, feature1 = "nCount_RNA", feature2 = "pct_mt")
